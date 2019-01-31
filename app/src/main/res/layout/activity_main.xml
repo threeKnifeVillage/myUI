@@ -9,7 +9,7 @@
 
     <com.example.musically.myui.widget.ExpandedTextView
         android:id="@+id/text"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -17,16 +17,14 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/expandTextId"
+            android:id="@+id/expandable_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
         <ImageView
-            android:id="@+id/togglerId"
+            android:id="@+id/expand_collapse"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
     </com.example.musically.myui.widget.ExpandedTextView>
-
-
 </android.support.constraint.ConstraintLayout>

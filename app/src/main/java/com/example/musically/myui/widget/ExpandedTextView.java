@@ -2,15 +2,16 @@ package com.example.musically.myui.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -32,6 +33,7 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
 
     private View mToggleView;
     private TextView mTv;
+    private ImageButton mButton;
     private int mTextHeightWidthMaxLines;
 
 
@@ -40,6 +42,9 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
     private int mMaxCollapsedLines;
     private int mExpandTextId;
     private int mToggleId;
+
+    private Drawable mExpandDrawable;
+    private Drawable mCollapsedDrawable;
 
     private ExpandedStateController mExpandedStateController;
     private float mAnimaionAlphaStart;
@@ -60,25 +65,22 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
 
     private void initView(AttributeSet attrs) {
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.ExpandedTextView);
-        mExpandTextId = typedArray.getResourceId(R.styleable.ExpandedTextView_expandTextId, 0);
-        mToggleId = typedArray.getResourceId(R.styleable.ExpandedTextView_togglerId, 0);
-        mMaxCollapsedLines = typedArray.getInteger(R.styleable.ExpandedTextView_maxCollapsedLines, 8);
+        mExpandTextId = typedArray.getResourceId(R.styleable.ExpandedTextView_expandTextId, R.id.expandable_text);
+        mToggleId = typedArray.getResourceId(R.styleable.ExpandedTextView_togglerId, R.id.expand_collapse);
+        mMaxCollapsedLines = typedArray.getInteger(R.styleable.ExpandedTextView_maxCollapsedLines, 2);
         typedArray.recycle();
         setOrientation(VERTICAL);
-        mTv = findViewById(R.id.expandTextId);
-        Log.e("wanglei", "mTv is " + mTv);
-        mTv.setOnClickListener(this);
-
-
-        mToggleView = findViewById(R.id.togglerId);
-        mToggleView.setOnClickListener(this);
-        mExpandedStateController = createExpandedStateController();
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mTv = findViewById(mExpandTextId);
+        mTv.setOnClickListener(this);
 
+        mToggleView = findViewById(mToggleId);
+        mToggleView.setOnClickListener(this);
+        mExpandedStateController = createExpandedStateController();
     }
 
     private ExpandedStateController createExpandedStateController() {
@@ -87,27 +89,25 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (!mRelayout || getVisibility() == GONE) {
+        if (!mRelayout || mButton.getVisibility() != VISIBLE) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             return;
         }
 
         mRelayout = false;
-        mToggleView.setVisibility(GONE);
         mTv.setMaxLines(Integer.MAX_VALUE);
-
+        mButton.setVisibility(GONE);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if (mTv.getLineCount() <= mMaxCollapsedLines) {
+
+        if (mTv.getLineCount() < mMaxCollapsedLines) {
             return;
         }
-
         mTextHeightWidthMaxLines = getRealTextViewHeight(mTv);
+
         if (mCollapsed) {
             mTv.setMaxLines(mMaxCollapsedLines);
         }
-
-        mToggleView.setVisibility(VISIBLE);
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        mButton.setVisibility(VISIBLE);
 
         if (mCollapsed) {
             mTv.post(new Runnable() {
@@ -116,7 +116,6 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
                     mMarginBetweenTextAndBottom = getHeight() - mTv.getHeight();
                 }
             });
-
             mCollapsedHeight = getMeasuredHeight();
         }
     }
@@ -143,7 +142,7 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
         }
 
         mCollapsed = !mCollapsed;
-        mExpandedStateController.changeState(mCollapsed);
+        mButton.setImageDrawable(mCollapsed ? mExpandDrawable : mCollapsedDrawable);
 
         Animation animation;
         if (mCollapsed) {

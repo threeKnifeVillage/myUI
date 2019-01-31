@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.example.musically.myui.widget.ExpandedTextView;
+import com.ms.square.android.expandabletextview.ExpandableTextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -12,9 +13,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ExpandableTextView
         ExpandedTextView textView = findViewById(R.id.text);
-
-
+        SwipeRefreshLayout
         textView.setText("adfasdfasdfasfasdfasdfasdhfiuasdhfasdhfalsdfasdfasdfasdfadfsfdsfsadfadsffsfasfasffasfasffasdfadsfasfsdfasdfasdfadsfadsfadsfasdfasdfasdfasdfasdfasdfasdfa");
     }
 }
