@@ -10,7 +10,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.ImageButton;
@@ -33,7 +32,6 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
     private boolean mCollapsed = true;
     private boolean mIsAnimation;
 
-    private View mToggleView;
     private TextView mTv;
     private ImageButton mButton;
     private int mTextHeightWidthMaxLines;
@@ -42,14 +40,13 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
     private int mCollapsedHeight;
     private int mMarginBetweenTextAndBottom;
     private int mMaxCollapsedLines;
-    private int mExpandTextId;
-    private int mToggleId;
 
     private Drawable mExpandDrawable;
     private Drawable mCollapsedDrawable;
 
     private ExpandedStateController mExpandedStateController;
     private float mAnimaionAlphaStart;
+    private int mHeight;
 
     public ExpandedTextView(Context context) {
         this(context, null);
@@ -67,8 +64,6 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
 
     private void initView(AttributeSet attrs) {
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.ExpandedTextView);
-        mExpandTextId = typedArray.getResourceId(R.styleable.ExpandedTextView_expandTextId, R.id.expandable_text);
-        mToggleId = typedArray.getResourceId(R.styleable.ExpandedTextView_togglerId, R.id.expand_collapse);
         mMaxCollapsedLines = typedArray.getInteger(R.styleable.ExpandedTextView_maxCollapsedLines, 2);
         typedArray.recycle();
         setOrientation(VERTICAL);
@@ -77,11 +72,12 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mTv = findViewById(mExpandTextId);
+        mTv = findViewById(R.id.expandable_text);
+        Log.e("wanglei", "mTv IS " + mTv);
         mTv.setOnClickListener(this);
 
-        mToggleView = findViewById(mToggleId);
-        mToggleView.setOnClickListener(this);
+        mButton = findViewById(R.id.expand_collapse);
+        mButton.setOnClickListener(this);
         mExpandedStateController = createExpandedStateController();
     }
 
@@ -91,7 +87,8 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (!mRelayout || mButton.getVisibility() != VISIBLE) {
+        Log.e("wanglei", "onMeasure" + mCollapsed + " mTv.getLineCount()" + mTv.getLineCount());
+        if (!mRelayout) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             return;
         }
@@ -109,17 +106,22 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
         if (mCollapsed) {
             mTv.setMaxLines(mMaxCollapsedLines);
         }
-        mButton.setVisibility(VISIBLE);
+//        mButton.setVisibility(VISIBLE);
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         if (mCollapsed) {
             mTv.post(new Runnable() {
                 @Override
                 public void run() {
                     mMarginBetweenTextAndBottom = getHeight() - mTv.getHeight();
+                    Log.e("wanglei", " mMarginBetweenTextAndBottom " + mMarginBetweenTextAndBottom);
                 }
             });
             mCollapsedHeight = getMeasuredHeight();
+            Log.e("wanglei", "mCollapsedHeight " + mCollapsedHeight);
         }
+
+        Log.e("wanglei", "getHeight " + getHeight());
     }
 
     private int getRealTextViewHeight(@NonNull TextView textView) {
@@ -129,22 +131,23 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
         return textHeight + padding;
     }
 
-    public void setText(String content) {
+    public void setText(String text) {
         mRelayout = true;
-        mTv.setText(content);
-        mTv.setVisibility(TextUtils.isEmpty(content) ? GONE : VISIBLE);
-        getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        mTv.setText(text);
+        setVisibility(TextUtils.isEmpty(text) ? View.GONE : View.VISIBLE);
         requestLayout();
     }
 
     @Override
     public void onClick(View view) {
-        if (mToggleView.getVisibility() != View.VISIBLE) {
-            return;
-        }
+        Log.e("wanglei", "onClick");
+//        if (mButton.getVisibility() != View.VISIBLE) {
+//            return;
+//        }
 
         mCollapsed = !mCollapsed;
         mButton.setImageDrawable(mCollapsed ? mExpandDrawable : mCollapsedDrawable);
+        Log.e("wanglei", "mCollapsed is " + mCollapsed);
 
         Animation animation;
         if (mCollapsed) {
@@ -156,7 +159,7 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                setAlpha(mAnimaionAlphaStart);
+//                setAlpha(mAnimaionAlphaStart);
             }
 
             @Override
@@ -195,16 +198,28 @@ public class ExpandedTextView extends LinearLayout implements View.OnClickListen
             mTargetView = targetView;
             mStartHeight = startHeight;
             mEndHeight = endHeight;
-            setDuration(3000);
+            setDuration(300);
         }
 
         @Override
         protected void applyTransformation(float interpolatedTime, Transformation t) {
             Log.e("wang.lei", "interpolatedTime is " + interpolatedTime);
             final int newHeight = (int) ((mEndHeight - mStartHeight) * interpolatedTime + mStartHeight);
-            mTv.setMaxLines(newHeight - mMarginBetweenTextAndBottom);
-            mTv.getLayoutParams().height = newHeight;
-            mTv.requestLayout();
+            mTv.setMaxHeight(newHeight - mMarginBetweenTextAndBottom);
+            mTargetView.getLayoutParams().height = newHeight;
+            mTargetView.requestLayout();
+        }
+
+        @Override
+        public boolean willChangeBounds() {
+            return true;
+        }
+
+
+        @Override
+        public void initialize( int width, int height, int parentWidth, int parentHeight ) {
+            super.initialize(width, height, parentWidth, parentHeight);
         }
     }
 }
+

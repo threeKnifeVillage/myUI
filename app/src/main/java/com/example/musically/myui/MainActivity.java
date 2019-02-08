@@ -13,9 +13,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ExpandableTextView
         ExpandedTextView textView = findViewById(R.id.text);
-        SwipeRefreshLayout
         textView.setText("adfasdfasdfasfasdfasdfasdhfiuasdhfasdhfalsdfasdfasdfasdfadfsfdsfsadfadsffsfasfasffasfasffasdfadsfasfsdfasdfasdfadsfadsfadsfasdfasdfasdfasdfasdfasdfasdfa");
     }
 }
