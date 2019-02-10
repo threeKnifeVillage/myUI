@@ -40,4 +40,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="4567"/>
+    
+    <com.example.musically.myui.widget.VerificationCodeEditText
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingEnd="10dp"
+        android:paddingStart="10dp"/>
 </LinearLayout>
